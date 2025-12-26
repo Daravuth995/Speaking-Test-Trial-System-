@@ -1,0 +1,3698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IELTS-Style Test Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;700&family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ========== CSS VARIABLE SYSTEM ========== */
+    :root {
+      /* Base Theme - Neutral (Pre-login) */
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary-color: #64748b;
+      --text-color: #1e293b;
+      --light-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --correct-color: #10b981;
+      --wrong-color: #ef4444;
+      --warning-color: #f59e0b;
+      --critical-color: #dc2626;
+      --success-color: #10b981;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --header-height: 70px;
+      --focus-glow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      --lock-color: #ef4444;
+    }
+    
+    /* Focus Mode (Test in progress) */
+    [data-theme="focus"] {
+      --primary-color: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary-color: #475569;
+      --text-color: #1e293b;
+      --light-bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+    }
+    
+    /* Warning Mode (Last 15 minutes) */
+    [data-theme="warning"] {
+      --primary-color: #f59e0b;
+      --primary-dark: #d97706;
+      --secondary-color: #92400e;
+      --text-color: #78350f;
+      --light-bg: #fffbeb;
+      --card-bg: #fef3c7;
+      --border-color: #fbbf24;
+    }
+    
+    /* Critical Mode (Last 5 minutes) */
+    [data-theme="critical"] {
+      --primary-color: #dc2626;
+      --primary-dark: #b91c1c;
+      --secondary-color: #7f1d1d;
+      --text-color: #991b1b;
+      --light-bg: #fef2f2;
+      --card-bg: #fee2e2;
+      --border-color: #fca5a5;
+      --shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -1px rgba(220, 38, 38, 0.06);
+    }
+    
+    /* Test Blocked Mode */
+    [data-theme="blocked"] {
+      --primary-color: #dc2626;
+      --primary-dark: #b91c1c;
+      --text-color: #7f1d1d;
+      --light-bg: #450a0a;
+      --card-bg: #7f1d1d;
+      --border-color: #fca5a5;
+    }
+    
+    /* Achievement Mode (Result view) */
+    [data-theme="achievement"] {
+      --primary-color: #10b981;
+      --primary-dark: #059669;
+      --secondary-color: #047857;
+      --text-color: #064e3b;
+      --light-bg: #ecfdf5;
+      --card-bg: #d1fae5;
+      --border-color: #a7f3d0;
+    }
+    
+    /* Dark Mode Variations */
+    [data-theme="dark"] {
+      --primary-color: #60a5fa;
+      --primary-dark: #3b82f6;
+      --text-color: #f1f5f9;
+      --light-bg: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --focus-glow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+      --lock-color: #f87171;
+    }
+    
+    [data-theme="dark"][data-state="focus"] {
+      --primary-color: #60a5fa;
+      --primary-dark: #3b82f6;
+      --light-bg: #0f172a;
+      --card-bg: #1e293b;
+    }
+    
+    [data-theme="dark"][data-state="warning"] {
+      --primary-color: #fbbf24;
+      --primary-dark: #f59e0b;
+      --light-bg: #451a03;
+      --card-bg: #78350f;
+    }
+    
+    [data-theme="dark"][data-state="critical"] {
+      --primary-color: #f87171;
+      --primary-dark: #ef4444;
+      --light-bg: #450a0a;
+      --card-bg: #7f1d1d;
+    }
+    
+    [data-theme="dark"][data-state="blocked"] {
+      --primary-color: #f87171;
+      --primary-dark: #ef4444;
+      --light-bg: #450a0a;
+      --card-bg: #7f1d1d;
+      --text-color: #fecaca;
+    }
+    
+    [data-theme="dark"][data-state="achievement"] {
+      --primary-color: #34d399;
+      --primary-dark: #10b981;
+      --light-bg: #064e3b;
+      --card-bg: #047857;
+    }
+    
+    /* ========== BASE STYLES ========== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: var(--transition);
+    }
+    
+    body {
+      background: var(--light-bg);
+      color: var(--text-color);
+      font-family: 'Lato', 'Kantumruy Pro', Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    
+    .khmer {
+      font-family: 'Kantumruy Pro', 'Lato', sans-serif;
+      letter-spacing: 0.02em;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* ========== LOGIN SCREEN RENOVATION ========== */
+    #loginContainer {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      animation: fadeIn 0.8s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #loginContainer::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+      animation: float 20s infinite linear;
+    }
+    
+    #loginBox {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      width: 96vw;
+      max-width: 440px;
+      box-shadow: var(--shadow-hover);
+      position: relative;
+      z-index: 10;
+      animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid var(--border-color);
+    }
+    
+    #loginBox h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--primary-color);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+    
+    #loginBox h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: var(--primary-color);
+      border-radius: 2px;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 1.8rem;
+    }
+    
+    #loginBox input {
+      background: var(--light-bg);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+      outline: none;
+      font-size: 1rem;
+      padding: 1rem 1.2rem;
+      padding-left: 3rem;
+      margin: 0;
+      border-radius: var(--radius);
+      width: 100%;
+      font-family: inherit;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    #loginBox input:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--focus-glow);
+      transform: translateY(-2px);
+    }
+    
+    #loginBox input:focus + .input-icon {
+      color: var(--primary-color);
+      transform: scale(1.1);
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-color);
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+    
+    #loginBtn {
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 1rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    #loginBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    }
+    
+    #loginBtn:active {
+      transform: translateY(-1px);
+    }
+    
+    #loginBtn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    #loginBtn:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+    
+    #loginLoading {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1.5rem;
+      margin-bottom: -0.5rem;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(37, 99, 235, 0.1);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      animation: spin 1.1s linear infinite;
+      margin: auto;
+    }
+    
+    #loginError {
+      color: var(--wrong-color);
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: 600;
+      min-height: 1.3rem;
+      font-size: 0.95rem;
+      padding: 0.8rem;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: var(--radius);
+      animation: shake 0.5s ease;
+      display: none;
+    }
+    
+    #loginError.show {
+      display: block;
+    }
+    
+    .login-footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--secondary-color);
+      font-size: 0.9rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    /* ========== COPY/PASTE BLOCKING STYLES ========== */
+    .no-copy-paste {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    .no-copy-paste::selection {
+      background: transparent;
+    }
+    
+    .no-copy-paste::-moz-selection {
+      background: transparent;
+    }
+    
+    .paste-allowed {
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+    }
+    
+    .copy-warning {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--warning-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 600;
+      animation: slideDown 0.3s ease;
+      z-index: 100;
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+    }
+    
+    .copy-warning::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid var(--warning-color);
+    }
+    
+    /* ========== HEADER & NAVIGATION REDESIGN ========== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.8rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      height: var(--header-height);
+      transition: var(--transition);
+    }
+    
+    [data-theme="dark"] .header {
+      background: rgba(30, 41, 59, 0.95);
+    }
+    
+    .header-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .badge {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .language-toggle {
+      background: var(--light-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 0.4rem;
+      display: flex;
+      cursor: pointer;
+      position: relative;
+      width: 80px;
+    }
+    
+    .language-option {
+      padding: 0.3rem 0.8rem;
+      border-radius: 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 1;
+      flex: 1;
+      text-align: center;
+      transition: var(--transition);
+    }
+    
+    .language-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: calc(50% - 2px);
+      height: calc(100% - 4px);
+      background: var(--primary-color);
+      border-radius: 16px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .language-toggle[data-lang="khmer"] .language-slider {
+      transform: translateX(calc(100% + 4px));
+    }
+    
+    .language-option.active {
+      color: white;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .theme-toggle:hover {
+      background: rgba(37, 99, 235, 0.1);
+      transform: rotate(15deg);
+    }
+    
+    .timer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    
+    .timer {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    .progress-bar {
+      width: 160px;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      transition: width 1s linear, background 0.3s;
+      border-radius: 3px;
+    }
+    
+    .timer.pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    .timer.pulse-fast {
+      animation: pulse 1s infinite;
+    }
+    
+    .timer.pulse-critical {
+      animation: pulse 0.5s infinite;
+    }
+    
+    /* ========== ENVIRONMENT REMINDER PANEL ========== */
+    .environment-reminder {
+      position: fixed;
+      top: calc(var(--header-height) + 1rem);
+      right: 2rem;
+      background: var(--card-bg);
+      border-left: 4px solid var(--primary-color);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      box-shadow: var(--shadow);
+      z-index: 750;
+      max-width: 250px;
+      font-size: 0.85rem;
+      display: none;
+    }
+    
+    .environment-reminder.visible {
+      display: block;
+      animation: slideInRight 0.3s ease;
+    }
+    
+    .reminder-title {
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .reminder-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .reminder-list li {
+      margin-bottom: 0.4rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    
+    .reminder-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+    
+    /* ========== STUDENT INFO BAR ========== */
+    .student-info {
+      position: sticky;
+      top: var(--header-height);
+      z-index: 900;
+      background: var(--card-bg);
+      margin: 1.5rem auto;
+      padding: 1.2rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      max-width: 1200px;
+      border-left: 5px solid var(--primary-color);
+      transition: var(--transition);
+    }
+    
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    }
+    
+    .student-details {
+      flex-grow: 1;
+    }
+    
+    .student-name {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .student-id {
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+    }
+    
+    .warning-counter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background: var(--light-bg);
+      border: 2px solid var(--border-color);
+    }
+    
+    .warning-counter.warning-1 {
+      border-color: #fbbf24;
+      color: #92400e;
+      background: #fef3c7;
+    }
+    
+    .warning-counter.warning-2 {
+      border-color: #f59e0b;
+      color: #78350f;
+      background: #fde68a;
+    }
+    
+    .warning-counter.warning-3 {
+      border-color: #dc2626;
+      color: #7f1d1d;
+      background: #fecaca;
+      animation: pulse 1s infinite;
+    }
+    
+    .warning-counter i {
+      font-size: 1.1rem;
+    }
+    
+    /* ========== PROGRESS SIDEBAR REDESIGN ========== */
+    .progress-sidebar {
+      position: fixed;
+      left: 2rem;
+      top: calc(var(--header-height) + 2rem);
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem 1rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 800;
+      border: 1px solid var(--border-color);
+    }
+    
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--border-color);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .progress-dot:hover {
+      transform: scale(1.3);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+    
+    .progress-dot.answered {
+      background: var(--primary-color);
+    }
+    
+    .progress-dot.current {
+      transform: scale(1.5);
+      box-shadow: 0 0 0 3px var(--primary-color);
+    }
+    
+    .progress-dot.correct {
+      background: var(--correct-color);
+    }
+    
+    .progress-dot.incorrect {
+      background: var(--wrong-color);
+    }
+    
+    .progress-dot::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--card-bg);
+      color: var(--text-color);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+    
+    .progress-dot:hover::after {
+      opacity: 1;
+    }
+    
+    /* ========== TEST DASHBOARD REDESIGN ========== */
+    .main-content {
+      max-width: 1200px;
+      margin: calc(var(--header-height) + 120px) auto 4rem;
+      padding: 0 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .questions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    @media (min-width: 900px) {
+      .questions-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .question-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .question-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .question-card.long {
+      border-left: 6px solid var(--primary-color);
+    }
+    
+    .question-number {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .question-number::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary-color);
+      border-radius: 50%;
+    }
+    
+    .question-text {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+    
+    /* ========== OPTIONS STYLING IMPROVEMENT ========== */
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      position: relative;
+    }
+    
+    .option:hover {
+      background: rgba(37, 99, 235, 0.05);
+      border-color: var(--primary-color);
+      transform: translateX(5px);
+    }
+    
+    .option.selected {
+      background: rgba(37, 99, 235, 0.1);
+      border-color: var(--primary-color);
+      box-shadow: var(--focus-glow);
+    }
+    
+    .option input {
+      margin-right: 1rem;
+      transform: scale(1.3);
+      accent-color: var(--primary-color);
+    }
+    
+    .option-label {
+      font-weight: 600;
+      margin-right: 0.5rem;
+      color: var(--primary-color);
+    }
+    
+    /* ========== AUDIO PLAYER ENHANCEMENT ========== */
+    .audio-container {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+    
+    .audio-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .audio-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+    
+    .audio-btn.playing {
+      animation: pulse 2s infinite;
+    }
+    
+    .audio-btn.playing::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: audioPulse 2s infinite;
+    }
+    
+    /* ========== DRAG AND DROP ENHANCEMENT ========== */
+    .drag-drop-container {
+      margin: 1.5rem 0;
+    }
+    
+    .drag-drop-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .drag-option {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 25px;
+      padding: 0.8rem 1.5rem;
+      cursor: grab;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      user-select: none;
+    }
+    
+    .drag-option:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .drag-option:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+    
+    .drag-drop-target {
+      min-height: 80px;
+      border: 2px dashed var(--primary-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background: rgba(37, 99, 235, 0.05);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary-color);
+      font-weight: 600;
+    }
+    
+    .drag-drop-target.active {
+      background: rgba(37, 99, 235, 0.1);
+      border-style: solid;
+      animation: targetPulse 1.5s infinite;
+    }
+    
+    .drag-drop-target.has-item {
+      justify-content: flex-start;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--correct-color);
+    }
+    
+    /* ========== SUBMIT BUTTON ENHANCEMENT ========== */
+    .submit-container {
+      position: sticky;
+      bottom: 2rem;
+      display: flex;
+      justify-content: center;
+      margin-top: 3rem;
+      z-index: 800;
+    }
+    
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 1.2rem 3rem;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(-2px);
+    }
+    
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .submit-btn:active::after {
+      width: 300px;
+      height: 300px;
+    }
+    
+    /* ========== MODAL REDESIGN ========== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 3rem;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: var(--shadow-hover);
+      animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid var(--border-color);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    /* ========== AGREEMENT MODAL ENHANCEMENTS ========== */
+    .agreement-modal {
+      max-width: 700px;
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .modal-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+    
+    .agreement-content {
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .agreement-content h4 {
+      color: var(--primary-color);
+      margin-top: 1.5rem;
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+    }
+    
+    .agreement-content ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .agreement-content li {
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    
+    .agreement-content li.critical {
+      color: var(--critical-color);
+      font-weight: 600;
+    }
+    
+    .agreement-content li::before {
+      content: '⚠️';
+      position: absolute;
+      left: -1.8rem;
+      top: 0;
+    }
+    
+    .agreement-content li.critical::before {
+      content: '🚫';
+    }
+    
+    .agreement-check {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      border: 2px solid var(--border-color);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: var(--transition);
+      border-radius: 30px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--success-color);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(30px);
+    }
+    
+    #agreeLabel {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    
+    .modal-btn {
+      padding: 1rem 2rem;
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 1rem;
+    }
+    
+    .modal-btn.primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+    }
+    
+    .modal-btn.secondary {
+      background: var(--light-bg);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+    
+    .modal-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    /* ========== TOAST NOTIFICATIONS ========== */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 400px;
+    }
+    
+    .toast {
+      background: var(--card-bg);
+      color: var(--text-color);
+      padding: 1.2rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-hover);
+      border-left: 5px solid var(--primary-color);
+      animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s forwards;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .toast.warning {
+      border-left-color: var(--warning-color);
+      border-left-width: 8px;
+    }
+    
+    .toast.critical {
+      border-left-color: var(--wrong-color);
+      border-left-width: 8px;
+      animation: slideInRight 0.3s ease, shake 0.5s ease 1s, fadeOut 0.3s ease 4.7s forwards;
+    }
+    
+    /* ========== WARNING & BLOCKED OVERLAYS ========== */
+    .focus-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      animation: fadeIn 0.3s ease;
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+    }
+    
+    .focus-warning-content {
+      background: var(--card-bg);
+      padding: 3rem;
+      border-radius: var(--radius);
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      animation: scaleIn 0.5s ease;
+      border: 3px solid var(--warning-color);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+    }
+    
+    .focus-warning.warning-2 .focus-warning-content {
+      border-color: #f59e0b;
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+    }
+    
+    .focus-warning.warning-3 .focus-warning-content {
+      border-color: var(--critical-color);
+      box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+    }
+    
+    .focus-warning-content i {
+      font-size: 4rem;
+      color: var(--warning-color);
+      margin-bottom: 1.5rem;
+    }
+    
+    .focus-warning.warning-2 .focus-warning-content i {
+      color: #f59e0b;
+    }
+    
+    .focus-warning.warning-3 .focus-warning-content i {
+      color: var(--critical-color);
+    }
+    
+    .warning-heading {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+    
+    .warning-message {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    
+    .warning-counter-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text-color);
+    }
+    
+    .warning-counter-display span {
+      background: var(--light-bg);
+      padding: 0.5rem 1.5rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--border-color);
+    }
+    
+    .warning-final-message {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(220, 38, 38, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--critical-color);
+      font-weight: 600;
+    }
+    
+    /* ========== TEST BLOCKED OVERLAY ========== */
+    .test-blocked-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.97);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4000;
+      animation: fadeIn 0.5s ease;
+      backdrop-filter: blur(20px);
+    }
+    
+    .test-blocked-content {
+      background: var(--card-bg);
+      padding: 4rem;
+      border-radius: var(--radius);
+      text-align: center;
+      max-width: 700px;
+      width: 90%;
+      animation: scaleIn 0.6s ease;
+      border: 4px solid var(--critical-color);
+      box-shadow: 0 0 40px rgba(220, 38, 38, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .test-blocked-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(220, 38, 38, 0.05) 10px,
+        rgba(220, 38, 38, 0.05) 20px
+      );
+      pointer-events: none;
+    }
+    
+    .lock-icon {
+      font-size: 5rem;
+      color: var(--critical-color);
+      margin-bottom: 2rem;
+      animation: shake 0.5s ease infinite;
+    }
+    
+    .blocked-heading {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      color: var(--critical-color);
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .blocked-message {
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: var(--text-color);
+    }
+    
+    .consequence-box {
+      background: rgba(220, 38, 38, 0.1);
+      border: 2px solid var(--critical-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+    
+    .consequence-box h4 {
+      color: var(--critical-color);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    
+    .consequence-box ul {
+      padding-left: 1.5rem;
+    }
+    
+    .consequence-box li {
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    
+    .consequence-box li::before {
+      content: '⛔';
+      position: absolute;
+      left: -1.5rem;
+    }
+    
+    .blocked-footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--border-color);
+      color: var(--secondary-color);
+      font-size: 0.9rem;
+    }
+    
+    /* ========== REDESIGNED RESULTS DASHBOARD ========== */
+    .score-modal {
+      max-width: 1000px;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    .score-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      padding: 3rem 2rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .score-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: float 20s infinite linear;
+    }
+    
+    .score-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      z-index: 1;
+    }
+    
+    .score-user-info {
+      z-index: 1;
+    }
+    
+    .score-user-name {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .score-user-id {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+    
+    .score-main {
+      padding: 3rem 2rem;
+      background: var(--card-bg);
+    }
+    
+    .score-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .summary-card {
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .summary-card.correct {
+      border-color: var(--correct-color);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .summary-card.wrong {
+      border-color: var(--wrong-color);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .summary-card.total {
+      border-color: var(--primary-color);
+      background: rgba(37, 99, 235, 0.1);
+    }
+    
+    .summary-value {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    
+    .summary-card.correct .summary-value {
+      color: var(--correct-color);
+    }
+    
+    .summary-card.wrong .summary-value {
+      color: var(--wrong-color);
+    }
+    
+    .summary-card.total .summary-value {
+      color: var(--primary-color);
+    }
+    
+    .summary-label {
+      font-weight: 600;
+      color: var(--secondary-color);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .score-breakdown {
+      background: var(--light-bg);
+      padding: 2rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    
+    .breakdown-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .breakdown-title::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--primary-color);
+      border-radius: 50%;
+    }
+    
+    .breakdown-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .breakdown-item {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: var(--transition);
+    }
+    
+    .breakdown-item:hover {
+      transform: translateX(5px);
+      box-shadow: var(--shadow);
+    }
+    
+    .breakdown-item.correct {
+      border-color: var(--correct-color);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .breakdown-item.wrong {
+      border-color: var(--wrong-color);
+      background: rgba(239, 68, 68, 0.05);
+    }
+    
+    .breakdown-status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .breakdown-status.correct {
+      background: var(--correct-color);
+      color: white;
+    }
+    
+    .breakdown-status.wrong {
+      background: var(--wrong-color);
+      color: white;
+    }
+    
+    .breakdown-question {
+      flex-grow: 1;
+    }
+    
+    .breakdown-q-number {
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 0.3rem;
+    }
+    
+    .breakdown-q-result {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .breakdown-item.correct .breakdown-q-result {
+      color: var(--correct-color);
+    }
+    
+    .breakdown-item.wrong .breakdown-q-result {
+      color: var(--wrong-color);
+    }
+    
+    .score-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+      background: var(--light-bg);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .action-btn {
+      padding: 1rem 2rem;
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+    }
+    
+    .action-btn.secondary {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .performance-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+      background: var(--light-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .metric-title {
+      font-weight: 700;
+      color: var(--text-color);
+    }
+    
+    .metric-value {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+    }
+    
+    .metric-bar {
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    .metric-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+      border-radius: 4px;
+      transition: width 1.5s ease-out;
+    }
+    
+    .metric-fill.fluency {
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+    
+    .metric-fill.vocabulary {
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+    }
+    
+    .metric-fill.grammar {
+      background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+    }
+    
+    /* ========== RESPONSIVE DESIGN ========== */
+    @media (max-width: 900px) {
+      .header {
+        padding: 0.8rem 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        height: auto;
+        min-height: var(--header-height);
+      }
+      
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .student-info {
+        margin: 1rem;
+        top: calc(var(--header-height) + 0.5rem);
+      }
+      
+      .main-content {
+        margin-top: calc(var(--header-height) + 80px);
+        padding: 0 1rem;
+      }
+      
+      .progress-sidebar {
+        display: none;
+      }
+      
+      .questions-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .mobile-timer {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        background: var(--primary-color);
+        color: white;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        z-index: 700;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: 3px solid var(--card-bg);
+      }
+      
+      .mobile-timer.warning {
+        animation: pulse 1.5s infinite;
+      }
+      
+      .mobile-timer.critical {
+        animation: pulse 0.8s infinite;
+      }
+      
+      .environment-reminder {
+        display: none !important;
+      }
+      
+      .score-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .breakdown-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .performance-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      #loginBox {
+        padding: 2rem 1.5rem;
+      }
+      
+      .modal {
+        padding: 2rem 1.5rem;
+      }
+      
+      .toast-container {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        max-width: none;
+      }
+      
+      .drag-drop-options {
+        flex-direction: column;
+      }
+      
+      .drag-option {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .test-blocked-content {
+        padding: 2rem 1.5rem;
+      }
+      
+      .blocked-heading {
+        font-size: 1.8rem;
+      }
+      
+      .score-header {
+        padding: 2rem 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+      
+      .score-actions {
+        flex-direction: column;
+      }
+    }
+    
+    /* ========== ANIMATIONS ========== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    
+    @keyframes float {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes ripple {
+      0% { transform: scale(0, 0); opacity: 0.5; }
+      100% { transform: scale(20, 20); opacity: 0; }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes grow {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes audioPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.5; }
+    }
+    
+    @keyframes targetPulse {
+      0%, 100% { border-color: var(--primary-color); }
+      50% { border-color: transparent; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    @keyframes lockPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+    
+    @keyframes slideDown {
+      from { transform: translate(-50%, -20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header" id="header">
+    <div class="header-title">
+      <i class="fa-solid fa-book-open-reader"></i>
+      <span>IELTS Speaking Test</span>
+      <div class="badge">Official Format</div>
+    </div>
+    
+    <div class="header-controls">
+      <div class="language-toggle" id="languageToggle" data-lang="english">
+        <div class="language-slider"></div>
+        <div class="language-option active" data-lang="english">EN</div>
+        <div class="language-option" data-lang="khmer">ខ្មែរ</div>
+      </div>
+      
+      <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+      </button>
+      
+      <div class="timer-container">
+        <div class="timer" id="timer">
+          <i class="fas fa-clock"></i>
+          <span id="timerDisplay">00:00:00</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Environment Reminder Panel -->
+  <div class="environment-reminder hidden" id="environmentReminder">
+    <div class="reminder-title">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>Test Environment Rules</span>
+    </div>
+    <ul class="reminder-list">
+      <li>Stay on this screen</li>
+      <li>Do not switch tabs</li>
+      <li>Ensure stable internet</li>
+      <li>Quiet environment required</li>
+    </ul>
+  </div>
+
+  <!-- Progress Sidebar -->
+  <div class="progress-sidebar hidden" id="progressSidebar">
+    <!-- Progress dots will be inserted here -->
+  </div>
+
+  <!-- Student Info Bar -->
+  <div class="student-info hidden" id="studentInfo">
+    <div class="avatar" id="avatar">JD</div>
+    <div class="student-details">
+      <div class="student-name" id="studentName">John Doe</div>
+      <div class="student-id" id="studentIdDisplay">STU-12345</div>
+    </div>
+    <div class="warning-counter hidden" id="warningCounter">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span>Warnings: <span id="warningCountDisplay">0</span>/3</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="questions-grid" id="questionsArea">
+      <!-- Questions will be inserted here -->
+    </div>
+    
+    <div class="submit-container">
+      <button class="submit-btn hidden" id="submitBtn">Submit Test</button>
+    </div>
+  </div>
+
+  <!-- Mobile Timer -->
+  <div class="mobile-timer hidden" id="mobileTimer">
+    <span id="mobileTimerDisplay">00:00</span>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Focus Warning (Cheating Detection) -->
+  <div class="focus-warning hidden" id="focusWarning">
+    <div class="focus-warning-content">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="warning-heading" id="warningHeading">Attention Required</div>
+      <div class="warning-message" id="warningMessage">Your attention is required on the test. Switching tabs or windows is recorded.</div>
+      <div class="warning-counter-display">
+        <span>Warning <span id="warningNumber">1</span> of 3</span>
+      </div>
+      <div class="warning-final-message hidden" id="finalWarningMessage">
+        ⚠️ <strong>Final Warning:</strong> Next violation will block your test immediately.
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Blocked Overlay -->
+  <div class="test-blocked-overlay hidden" id="testBlockedOverlay">
+    <div class="test-blocked-content">
+      <div class="lock-icon">
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="blocked-heading">Test Access Blocked</div>
+      <div class="blocked-message">
+        Your test has been terminated due to multiple policy violations.
+      </div>
+      
+      <div class="consequence-box">
+        <h4>Consequences Applied:</h4>
+        <ul>
+          <li>Score recorded as 0 (zero)</li>
+          <li>Test attempt marked as invalid</li>
+          <li>Further violations will be reported</li>
+          <li>No restart or retry available</li>
+        </ul>
+      </div>
+      
+      <div class="blocked-footer">
+        <i class="fas fa-shield-alt"></i> Activity monitoring was enabled throughout your session.
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="agreementOverlay" class="modal-overlay hidden">
+    <div class="modal agreement-modal">
+      <div class="modal-header">
+        <i class="fas fa-file-contract" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+        <div class="modal-title" id="agreementTitle">Test Agreement & Policy</div>
+      </div>
+      
+      <div class="agreement-content" id="agreementContent">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+      
+      <div class="agreement-check">
+        <label class="toggle-switch">
+          <input type="checkbox" id="agreeCheckbox">
+          <span class="slider"></span>
+        </label>
+        <label for="agreeCheckbox" id="agreeLabel">I have read and agree to all terms and conditions</label>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="agreeBtn">I Agree - Start Test</button>
+        <button class="modal-btn secondary" id="disagreeBtn">Cancel & Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="restrictionOverlay" class="modal-overlay hidden">
+    <div class="modal restriction-modal">
+      <div class="modal-header">
+        <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem; color: var(--wrong-color); margin-bottom: 1.5rem;"></i>
+        <div class="modal-title">Access Restricted</div>
+      </div>
+      <div class="modal-content text-center">
+        <p id="restrictionMessage">Your account has been restricted from accessing this test.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" id="restrictionOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REDESIGNED SCORE MODAL -->
+  <div id="scoreModal" class="modal-overlay hidden">
+    <div class="modal score-modal">
+      <!-- Header Section -->
+      <div class="score-header">
+        <div class="score-avatar" id="scoreAvatar">JD</div>
+        <div class="score-user-info">
+          <div class="score-user-name" id="scoreUserName">John Doe</div>
+          <div class="score-user-id" id="scoreUserId">STU-12345</div>
+        </div>
+      </div>
+      
+      <!-- Main Content Section -->
+      <div class="score-main">
+        <!-- Summary Cards -->
+        <div class="score-summary">
+          <div class="summary-card total">
+            <div class="summary-value" id="finalScore">0</div>
+            <div class="summary-label">Total Score</div>
+          </div>
+          <div class="summary-card correct">
+            <div class="summary-value" id="correctAnswers">0</div>
+            <div class="summary-label">Correct Answers</div>
+          </div>
+          <div class="summary-card wrong">
+            <div class="summary-value" id="wrongAnswers">0</div>
+            <div class="summary-label">Wrong Answers</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value" id="accuracyRate">0%</div>
+            <div class="summary-label">Accuracy Rate</div>
+          </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="performance-metrics">
+          <div class="metric-card">
+            <div class="metric-header">
+              <div class="metric-title">Fluency</div>
+              <div class="metric-value" id="fluencyScore">0/10</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill fluency" id="fluencyBar" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-header">
+              <div class="metric-title">Vocabulary</div>
+              <div class="metric-value" id="vocabularyScore">0/10</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill vocabulary" id="vocabularyBar" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-header">
+              <div class="metric-title">Grammar</div>
+              <div class="metric-value" id="grammarScore">0/10</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill grammar" id="grammarBar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Question Breakdown -->
+        <div class="score-breakdown">
+          <div class="breakdown-title">
+            <i class="fas fa-list-check"></i>
+            Question-by-Question Breakdown
+          </div>
+          <div class="breakdown-list" id="breakdownList">
+            <!-- Breakdown items will be inserted here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Actions Section -->
+      <div class="score-actions">
+        <button class="action-btn primary" id="screenshotBtn">
+          <i class="fas fa-camera"></i> Save Result
+        </button>
+        <button class="action-btn secondary" id="closeScoreBtn">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Form -->
+  <div class="centered" id="loginContainer">
+    <form id="loginBox" onsubmit="event.preventDefault(); login();">
+      <h2>Test Portal Login</h2>
+      
+      <div class="input-group">
+        <i class="fas fa-user input-icon"></i>
+        <input type="text" id="studentId" placeholder="Student ID" required autocomplete="username" class="paste-allowed" />
+      </div>
+      
+      <div class="input-group">
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password" id="password" placeholder="Password" required autocomplete="current-password" class="paste-allowed" />
+      </div>
+      
+      <button id="loginBtn" type="submit">Login</button>
+      
+      <div id="loginLoading">
+        <div class="spinner"></div>
+      </div>
+      
+      <div id="loginError"></div>
+      
+      <div class="login-footer">
+        <i class="fas fa-shield-alt"></i> Secure Test Environment • Activity Monitoring Enabled
+      </div>
+    </form>
+  </div>
+
+  <script>
+  // ========== CONFIGURATION ==========
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQknsM0MJwRmoTGPai-_E2OSMb9FPxK7UsexqmpXZAqelyw99guEhjhNQn9hCL0m5uTg/exec";
+  
+  // ========== STATE MANAGEMENT ==========
+  let studentId = '';
+  let password = '';
+  let currentQuestions = [];
+  let validRenderedQuestions = [];
+  let submissionInterval;
+  let testTimer;
+  let testDuration = 0;
+  let timeLeft = 0;
+  let timerWarningShown = false;
+  let timerFinalWarningShown = false;
+  let startTime = null;
+  let endTime = null;
+  let currentLanguage = 'english';
+  let focusWarningCount = 0;
+  let lastInteractionTime = Date.now();
+  let tabSwitchCount = 0;
+  let isTestBlocked = false;
+  let copyPasteViolations = 0;
+  
+  // ========== LANGUAGE TRANSLATIONS ==========
+  const translations = {
+    english: {
+      agreement: {
+        title: "Test Agreement & Policy",
+        welcome: "Welcome to the IELTS-Style Speaking Test. Before proceeding, you must read and agree to the following terms and conditions. This test is monitored and violations have immediate consequences.",
+        rulesTitle: "Test Duration & Rules:",
+        rules: [
+          "Duration: 60 minutes strict time limit",
+          "One attempt only - cannot be paused or restarted",
+          "Auto-scoring applied immediately after submission",
+          "Activity monitoring is enabled throughout the test",
+          "Maximum 3 warnings for policy violations",
+          "Continued violations result in: Test blocked, Score = 0, No retry option"
+        ],
+        integrityTitle: "Academic Integrity & Monitoring:",
+        integrity: "Activity monitoring is enabled. All suspicious behavior is recorded and affects results immediately. By taking this test, you agree that all responses are your own original work.",
+        techTitle: "Technical & Environment Requirements:",
+        tech: [
+          "Stable internet connection required - disconnections may affect scoring",
+          "Modern browser recommended (Chrome, Firefox, Edge)",
+          "Headphones required for audio questions",
+          "Quiet environment - background noise may affect recording quality",
+          "No tab switching allowed - stay on this screen",
+          "No external assistance permitted"
+        ],
+        agreeLabel: "I have read and agree to all terms and conditions",
+        agreeBtn: "I Agree - Start Test",
+        cancelBtn: "Cancel & Exit"
+      },
+      restriction: {
+        title: "Access Restricted",
+        message: "Your account has been restricted from accessing this test."
+      },
+      login: {
+        title: "Test Portal Login",
+        studentId: "Student ID",
+        password: "Password",
+        loginBtn: "Login"
+      },
+      warnings: {
+        focusWarning: "Attention Required",
+        focusMessage1: "Your attention is required on the test. Switching tabs or windows is recorded. This is warning 1 of 3.",
+        focusMessage2: "Second violation detected. Suspicious behavior is recorded. Next violation will block your test. This is warning 2 of 3.",
+        focusMessage3: "Final warning! Next violation will block your test immediately. Score will be recorded as 0.",
+        timeWarning15: "15 minutes remaining",
+        timeWarning5: "5 minutes remaining - Please review your answers",
+        timeWarning1: "1 minute remaining - Time is almost up!",
+        environmentReminder: "Stay on this screen • Do not switch tabs • Ensure stable internet • Quiet environment required",
+        copyPasteWarning: "Copy/Paste detected! This is not allowed for this input field.",
+        suspiciousBehavior: "Suspicious behavior detected! This incident has been recorded."
+      },
+      blocked: {
+        title: "Test Access Blocked",
+        message: "Your test has been terminated due to multiple policy violations.",
+        consequences: "Consequences Applied:",
+        consequence1: "Score recorded as 0 (zero)",
+        consequence2: "Test attempt marked as invalid",
+        consequence3: "Further violations will be reported",
+        consequence4: "No restart or retry available",
+        footer: "Activity monitoring was enabled throughout your session."
+      },
+      results: {
+        correctAnswers: "Correct Answers",
+        wrongAnswers: "Wrong Answers",
+        totalScore: "Total Score",
+        accuracyRate: "Accuracy Rate",
+        questionBreakdown: "Question-by-Question Breakdown",
+        saveResult: "Save Result",
+        close: "Close"
+      }
+    },
+    khmer: {
+      agreement: {
+        title: "កិច្ចព្រមព្រៀង និងគោលការណ៍ការប្រឡង",
+        welcome: "សូមស្វាគមន៍មកកាន់ការប្រឡងសំដែងរបៀប IELTS។ មុននឹងបន្ត អ្នកត្រូវតែអាន និងយល់ព្រមតាមលក្ខខណ្ឌ និងល័ក្ខខ័ណ្ឌខាងក្រោម។ ការប្រឡងនេះត្រូវបានត្រួតពិនិត្យ ហើយការរំលោភបំពាននឹងមានផលវិបាកភ្លាមៗ។",
+        rulesTitle: "រយៈពេល និងច្បាប់ការប្រឡង៖",
+        rules: [
+          "រយៈពេល៖ កំណត់ពេលយ៉ាងតឹងរឹង ៦០ នាទី",
+          "ព្យាយាមតែមួយគត់ - មិនអាចផ្អាក ឬចាប់ផ្តើមឡើងវិញបានទេ",
+          "ពិន្ទុស្វ័យប្រវត្តិត្រូវបានអនុវត្តភ្លាមៗបន្ទាប់ពីការដាក់ស្នើ",
+          "ការត្រួតពិនិត្យសកម្មភាពត្រូវបានបើកដំណើរការពេញមួយការប្រឡង",
+          "ការព្រមានអតិបរមា ៣ ដងសម្រាប់ការរំលោភបំពានគោលការណ៍",
+          "ការរំលោភបំពានបន្តនឹងនាំឱ្យមាន៖ ការប្រឡងត្រូវបានរារាំង ពិន្ទុ = ០ គ្មានជម្រើសព្យាយាមម្តងទៀត"
+        ],
+        integrityTitle: "សុច្ចរិតផ្នែកអប់រំ និងការត្រួតពិនិត្យ៖",
+        integrity: "ការត្រួតពិនិត្យសកម្មភាពត្រូវបានបើកដំណើរការ។ ឥរិយាបទសង្ស័យទាំងអស់ត្រូវបានកត់ត្រា និងប៉ះពាល់ដល់លទ្ធផលភ្លាមៗ។ ក្នុងការប្រឡងនេះ អ្នកយល់ព្រមថាចម្លើយទាំងអស់គឺជាស្នាដៃដើមរបស់អ្នកផ្ទាល់។",
+        techTitle: "តម្រូវការបច្ចេកទេស និងបរិស្ថាន៖",
+        tech: [
+          "ត្រូវការការតភ្ជាប់អ៊ីនធឺណិតស្ថិរភាព - ការបែកដំណើរអ៊ីនធឺណិតអាចប៉ះពាល់ដល់ពិន្ទុ",
+          "ផ្ដល់អនុសាសន៍ឱ្យប្រើកម្មវិធីរុករកទំនើប (Chrome, Firefox, Edge)",
+          "ត្រូវការកាសសំឡេងសម្រាប់សំណួរអូឌីយ៉ូ",
+          "បរិស្ថានស្ងាត់ - សម្លេងផ្ទៃខាងក្រោយអាចប៉ះពាល់ដល់គុណភាពការថត",
+          "មិនអនុញ្ញាតឱ្យផ្លាស់ប្តូរផ្ទាំង - សូមនៅលើអេក្រង់នេះ",
+          "មិនអនុញ្ញាតឱ្យមានការជំនួយខាងក្រោយទេ"
+        ],
+        agreeLabel: "ខ្ញុំបានអាន និងយល់ព្រមតាមលក្ខខណ្ឌ និងល័ក្ខខ័ណ្ឌទាំងអស់",
+        agreeBtn: "ខ្ញុំយល់ព្រម - ចាប់ផ្ដើមការប្រឡង",
+        cancelBtn: "បោះបង់ និងចាកចេញ"
+      },
+      restriction: {
+        title: "ការចូលប្រើត្រូវបានដាក់កំហិត",
+        message: "គណនីរបស់អ្នកត្រូវបានដាក់កំហិតពីការចូលប្រើការប្រឡងនេះ។"
+      },
+      login: {
+        title: "ការចូលប្រើវិបផតថលការប្រឡង",
+        studentId: "លេខសម្គាល់សិស្ស",
+        password: "ពាក្យសម្ងាត់",
+        loginBtn: "ចូល"
+      },
+      warnings: {
+        focusWarning: "តម្រូវឱ្យមានការយកចិត្តទុកដាក់",
+        focusMessage1: "តម្រូវឱ្យមានការយកចិត្តទុកដាក់លើការប្រឡង។ ការផ្លាស់ប្តូរផ្ទាំង ឬបង្អួចត្រូវបានកត់ត្រា។ នេះជាការព្រមានលើកទី ១ ក្នុងចំណោម ៣។",
+        focusMessage2: "បានរកឃើញការរំលោភបំពានលើកទីពីរ។ ឥរិយាបទសង្ស័យត្រូវបានកត់ត្រា។ ការរំលោភបំពានបន្ទាប់នឹងរារាំងការប្រឡងរបស់អ្នក។ នេះជាការព្រមានលើកទី ២ ក្នុងចំណោម ៣។",
+        focusMessage3: "ការព្រមានចុងក្រោយ! ការរំលោភបំពានបន្ទាប់នឹងរារាំងការប្រឡងរបស់អ្នកភ្លាមៗ។ ពិន្ទុនឹងត្រូវបានកត់ត្រាជា ០។",
+        timeWarning15: "នៅសល់ ១៥ នាទី",
+        timeWarning5: "នៅសល់ ៥ នាទី - សូមពិនិត្យចម្លើយរបស់អ្នកឡើងវិញ",
+        timeWarning1: "នៅសល់ ១ នាទី - ពេលវេលាជិតអស់ហើយ!",
+        environmentReminder: "សូមនៅលើអេក្រង់នេះ • កុំផ្លាស់ប្តូរផ្ទាំង • ធានាបាននូវអ៊ីនធឺណិតស្ថិរភាព • តម្រូវឱ្យមានបរិស្ថានស្ងាត់",
+        copyPasteWarning: "បានរកឃើញការចម្លង/បិទភ្ជាប់! នេះមិនត្រូវបានអនុញ្ញាតសម្រាប់ការបញ្ចូលនេះទេ។",
+        suspiciousBehavior: "បានរកឃើញឥរិយាបទសង្ស័យ! ឧប្បត្តិហេតុនេះត្រូវបានកត់ត្រា។"
+      },
+      blocked: {
+        title: "ការចូលប្រើការប្រឡងត្រូវបានរារាំង",
+        message: "ការប្រឡងរបស់អ្នកត្រូវបានបញ្ចប់ដោយសារការរំលោភបំពានគោលការណ៍ច្រើនលើក។",
+        consequences: "ផលវិបាកដែលបានអនុវត្ត៖",
+        consequence1: "ពិន្ទុត្រូវបានកត់ត្រាជា ០ (សូន្យ)",
+        consequence2: "ការព្យាយាមប្រឡងត្រូវបានសម្គាល់ថាមិនត្រឹមត្រូវ",
+        consequence3: "ការរំលោភបំពានបន្ថែមទៀតនឹងត្រូវបានរាយការណ៍",
+        consequence4: "គ្មានជម្រើសចាប់ផ្តើមឡើងវិញ ឬព្យាយាមម្តងទៀតទេ",
+        footer: "ការត្រួតពិនិត្យសកម្មភាពត្រូវបានបើកដំណើរការពេញមួយសម័យរបស់អ្នក។"
+      },
+      results: {
+        correctAnswers: "ចម្លើយត្រឹមត្រូវ",
+        wrongAnswers: "ចម្លើយខុស",
+        totalScore: "ពិន្ទុសរុប",
+        accuracyRate: "អត្រាត្រឹមត្រូវ",
+        questionBreakdown: "ការបំបែកតាមសំណួរ",
+        saveResult: "រក្សាទុកលទ្ធផល",
+        close: "បិទ"
+      }
+    }
+  };
+  
+  // ========== UTILITY FUNCTIONS ==========
+  function fixDropboxAudioUrl(url) {
+    if (!url) return '';
+    if (url.includes('raw=1')) return url;
+    url = url.replace(/([&?]dl=[01])/, '');
+    if (url.includes('?')) return url + '&raw=1';
+    return url + '?raw=1';
+  }
+  
+  function formatName(name) {
+    if (!name) return '';
+    return name.split(' ').map(part =>
+      ['mr', 'mrs', 'ms', 'dr', 'prof'].includes(part.toLowerCase())
+        ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    ).join(' ');
+  }
+  
+  // ========== THEME MANAGEMENT ==========
+  function updateThemeForState() {
+    const root = document.documentElement;
+    const timeLeftMinutes = timeLeft / 60;
+    
+    // Remove all state attributes
+    root.removeAttribute('data-state');
+    
+    if (isTestBlocked) {
+      // Test blocked state
+      root.setAttribute('data-state', 'blocked');
+    } else if (timeLeft <= 0) {
+      // Test finished - achievement mode
+      root.setAttribute('data-state', 'achievement');
+    } else if (timeLeft <= 300) { // 5 minutes
+      root.setAttribute('data-state', 'critical');
+    } else if (timeLeft <= 900) { // 15 minutes
+      root.setAttribute('data-state', 'warning');
+    } else if (document.getElementById('studentInfo') && !document.getElementById('studentInfo').classList.contains('hidden')) {
+      // Test in progress
+      root.setAttribute('data-state', 'focus');
+    }
+    // Pre-login state has no data-state attribute (neutral theme)
+  }
+  
+  // ========== LANGUAGE MANAGEMENT ==========
+  function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('testLanguage', lang);
+    
+    // Update toggle UI
+    const toggle = document.getElementById('languageToggle');
+    toggle.setAttribute('data-lang', lang);
+    
+    // Update all translatable elements
+    updateTranslations();
+  }
+  
+  function updateTranslations() {
+    const t = translations[currentLanguage];
+    
+    // Update login screen
+    document.querySelector('#loginBox h2').textContent = t.login.title;
+    document.getElementById('studentId').placeholder = t.login.studentId;
+    document.getElementById('password').placeholder = t.login.password;
+    document.getElementById('loginBtn').textContent = t.login.loginBtn;
+    document.querySelector('.login-footer').innerHTML = `<i class="fas fa-shield-alt"></i> Secure Test Environment • Activity Monitoring Enabled`;
+    
+    // Update agreement modal
+    document.getElementById('agreementTitle').textContent = t.agreement.title;
+    
+    const agreementContent = `
+      <p>${t.agreement.welcome}</p>
+      
+      <h4>${t.agreement.rulesTitle}</h4>
+      <ul>
+        ${t.agreement.rules.map((rule, index) => `
+          <li class="${index >= 4 ? 'critical' : ''}">${rule}</li>
+        `).join('')}
+      </ul>
+      
+      <h4>${t.agreement.integrityTitle}</h4>
+      <p>${t.agreement.integrity}</p>
+      
+      <h4>${t.agreement.techTitle}</h4>
+      <ul>
+        ${t.agreement.tech.map((item, index) => `
+          <li class="${index >= 3 ? 'critical' : ''}">${item}</li>
+        `).join('')}
+      </ul>
+      
+      <div style="margin-top: 2rem; padding: 1rem; background: rgba(220, 38, 38, 0.1); border-radius: var(--radius); border-left: 4px solid var(--critical-color);">
+        <strong>⚠️ Important:</strong> Violations are recorded automatically. After 3 warnings, your test will be blocked and scored as 0.
+      </div>
+    `;
+    document.getElementById('agreementContent').innerHTML = agreementContent;
+    document.getElementById('agreeLabel').textContent = t.agreement.agreeLabel;
+    document.getElementById('agreeBtn').textContent = t.agreement.agreeBtn;
+    document.getElementById('disagreeBtn').textContent = t.agreement.cancelBtn;
+    
+    // Update restriction modal
+    document.querySelector('.restriction-modal .modal-title').textContent = t.restriction.title;
+    
+    // Update environment reminder
+    const reminderList = document.querySelector('#environmentReminder .reminder-list');
+    if (reminderList) {
+      reminderList.innerHTML = `
+        <li>${t.warnings.environmentReminder.split(' • ')[0]}</li>
+        <li>${t.warnings.environmentReminder.split(' • ')[1]}</li>
+        <li>${t.warnings.environmentReminder.split(' • ')[2]}</li>
+        <li>${t.warnings.environmentReminder.split(' • ')[3]}</li>
+      `;
+    }
+    
+    // Update results dashboard
+    document.getElementById('correctAnswersLabel').textContent = t.results.correctAnswers;
+    document.getElementById('wrongAnswersLabel').textContent = t.results.wrongAnswers;
+    document.getElementById('totalScoreLabel').textContent = t.results.totalScore;
+    document.getElementById('accuracyRateLabel').textContent = t.results.accuracyRate;
+    document.getElementById('questionBreakdownLabel').textContent = t.results.questionBreakdown;
+    document.getElementById('screenshotBtn').innerHTML = `<i class="fas fa-camera"></i> ${t.results.saveResult}`;
+    document.getElementById('closeScoreBtn').innerHTML = `<i class="fas fa-times"></i> ${t.results.close}`;
+    
+    // Add khmer class to body for font styling
+    if (currentLanguage === 'khmer') {
+      document.body.classList.add('khmer');
+    } else {
+      document.body.classList.remove('khmer');
+    }
+  }
+  
+  // ========== TOAST NOTIFICATION SYSTEM ==========
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'critical' ? 'fa-exclamation-circle' : 
+                 type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <div>${message}</div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Remove toast after animation
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+  
+  // ========== COPY/PASTE BLOCKING SYSTEM ==========
+  function initCopyPasteBlocking() {
+    // Allow copy/paste only for login fields
+    const loginFields = document.querySelectorAll('#studentId, #password');
+    loginFields.forEach(field => {
+      field.classList.add('paste-allowed');
+    });
+    
+    // Block copy/paste for all other inputs during test
+    document.addEventListener('copy', function(e) {
+      const activeElement = document.activeElement;
+      const isLoginPage = document.getElementById('loginContainer').classList.contains('hidden') === false;
+      
+      // Allow copy during login
+      if (isLoginPage) return true;
+      
+      // Block copy during test (except for allowed fields)
+      if (activeElement && 
+          !activeElement.classList.contains('paste-allowed') && 
+          (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+        e.preventDefault();
+        
+        // Show warning
+        showCopyPasteWarning(activeElement);
+        recordCopyPasteViolation();
+        
+        return false;
+      }
+    });
+    
+    document.addEventListener('paste', function(e) {
+      const activeElement = document.activeElement;
+      const isLoginPage = document.getElementById('loginContainer').classList.contains('hidden') === false;
+      
+      // Allow paste during login
+      if (isLoginPage) return true;
+      
+      // Block paste during test (except for allowed fields)
+      if (activeElement && 
+          !activeElement.classList.contains('paste-allowed') && 
+          (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+        e.preventDefault();
+        
+        // Show warning
+        showCopyPasteWarning(activeElement);
+        recordCopyPasteViolation();
+        
+        return false;
+      }
+    });
+    
+    // Block right-click context menu on test inputs
+    document.addEventListener('contextmenu', function(e) {
+      const activeElement = document.activeElement;
+      const isLoginPage = document.getElementById('loginContainer').classList.contains('hidden') === false;
+      
+      if (isLoginPage) return true;
+      
+      if (activeElement && 
+          (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+        e.preventDefault();
+        showToast(translations[currentLanguage].warnings.suspiciousBehavior, 'warning');
+        return false;
+      }
+    });
+    
+    // Add no-copy-paste class to all test inputs
+    document.addEventListener('DOMContentLoaded', function() {
+      // This will be called when questions are loaded
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.addedNodes.length) {
+            document.querySelectorAll('.question-card input, .question-card textarea, .drag-option, .option').forEach(element => {
+              if (!element.classList.contains('paste-allowed')) {
+                element.classList.add('no-copy-paste');
+              }
+            });
+          }
+        });
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  }
+  
+  function showCopyPasteWarning(element) {
+    // Remove any existing warnings
+    document.querySelectorAll('.copy-warning').forEach(warning => warning.remove());
+    
+    // Create and show new warning
+    const warning = document.createElement('div');
+    warning.className = 'copy-warning';
+    warning.textContent = translations[currentLanguage].warnings.copyPasteWarning;
+    
+    // Position warning near the element
+    const rect = element.getBoundingClientRect();
+    warning.style.position = 'fixed';
+    warning.style.top = rect.top - 40 + 'px';
+    warning.style.left = rect.left + rect.width/2 + 'px';
+    warning.style.transform = 'translateX(-50%)';
+    
+    document.body.appendChild(warning);
+    
+    // Remove warning after 3 seconds
+    setTimeout(() => {
+      warning.remove();
+    }, 3000);
+  }
+  
+  function recordCopyPasteViolation() {
+    copyPasteViolations++;
+    
+    // Show warning message
+    showToast(`${translations[currentLanguage].warnings.copyPasteWarning} (Incident ${copyPasteViolations})`, 'warning');
+    
+    // Count towards overall violations
+    tabSwitchCount++;
+    updateWarningCounter();
+    
+    // If this is the 3rd violation, block the test
+    if (tabSwitchCount >= 3) {
+      showFocusWarning(3);
+      setTimeout(() => {
+        blockTest();
+      }, 3000);
+    } else if (tabSwitchCount >= 2) {
+      showFocusWarning(2);
+    } else if (tabSwitchCount >= 1) {
+      showFocusWarning(1);
+    }
+  }
+  
+  // ========== CHEATING DETECTION (UI LEVEL) ==========
+  function initCheatingDetection() {
+    // Track visibility changes (tab switching)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !document.getElementById('scoreModal').classList.contains('hidden') && !isTestBlocked) {
+        // User switched tabs/windows
+        tabSwitchCount++;
+        lastInteractionTime = Date.now();
+        
+        // Show environment reminder
+        document.getElementById('environmentReminder').classList.add('visible');
+        
+        if (tabSwitchCount >= 3) {
+          showFocusWarning(3);
+          setTimeout(() => {
+            blockTest();
+          }, 5000);
+        } else if (tabSwitchCount >= 2) {
+          showFocusWarning(2);
+        } else if (tabSwitchCount >= 1) {
+          showFocusWarning(1);
+          // Subtle warning
+          document.title = "⚠️ Please return to test";
+          setTimeout(() => {
+            document.title = "IELTS Speaking Test";
+          }, 2000);
+        }
+        
+        // Update warning counter display
+        updateWarningCounter();
+      }
+    });
+    
+    // Track mouse leaving window
+    document.addEventListener('mouseleave', (e) => {
+      if (e.clientY <= 0 && !document.getElementById('scoreModal').classList.contains('hidden') && !isTestBlocked) {
+        // Mouse left the window
+        lastInteractionTime = Date.now();
+      }
+    });
+    
+    // Detect unusual keyboard patterns
+    let rapidKeyPressCount = 0;
+    let lastKeyPressTime = 0;
+    
+    document.addEventListener('keydown', (e) => {
+      const now = Date.now();
+      if (now - lastKeyPressTime < 100) {
+        rapidKeyPressCount++;
+        if (rapidKeyPressCount > 10) {
+          // Rapid key presses detected
+          showToast(translations[currentLanguage].warnings.suspiciousBehavior, 'warning');
+          recordSuspiciousBehavior();
+        }
+      } else {
+        rapidKeyPressCount = 0;
+      }
+      lastKeyPressTime = now;
+      lastInteractionTime = now;
+    });
+    
+    // Reset interaction timer on user activity
+    document.addEventListener('mousemove', () => lastInteractionTime = Date.now());
+    document.addEventListener('keydown', () => lastInteractionTime = Date.now());
+    document.addEventListener('click', () => lastInteractionTime = Date.now());
+  }
+  
+  function recordSuspiciousBehavior() {
+    tabSwitchCount++;
+    updateWarningCounter();
+    
+    if (tabSwitchCount >= 3) {
+      showFocusWarning(3);
+      setTimeout(() => {
+        blockTest();
+      }, 3000);
+    } else if (tabSwitchCount >= 2) {
+      showFocusWarning(2);
+    }
+  }
+  
+  function showFocusWarning(warningNumber) {
+    if (isTestBlocked) return;
+    
+    const t = translations[currentLanguage];
+    const warningOverlay = document.getElementById('focusWarning');
+    const warningHeading = document.getElementById('warningHeading');
+    const warningMessage = document.getElementById('warningMessage');
+    const warningNumberSpan = document.getElementById('warningNumber');
+    const finalWarningMessage = document.getElementById('finalWarningMessage');
+    
+    // Update content based on warning number
+    warningNumberSpan.textContent = warningNumber;
+    warningHeading.textContent = t.warnings.focusWarning;
+    
+    if (warningNumber === 1) {
+      warningMessage.textContent = t.warnings.focusMessage1;
+      warningOverlay.className = 'focus-warning warning-1';
+      finalWarningMessage.classList.add('hidden');
+    } else if (warningNumber === 2) {
+      warningMessage.textContent = t.warnings.focusMessage2;
+      warningOverlay.className = 'focus-warning warning-2';
+      finalWarningMessage.classList.add('hidden');
+    } else if (warningNumber === 3) {
+      warningMessage.textContent = t.warnings.focusMessage3;
+      warningOverlay.className = 'focus-warning warning-3';
+      finalWarningMessage.classList.remove('hidden');
+    }
+    
+    // Show the overlay
+    warningOverlay.classList.remove('hidden');
+    
+    // Auto-hide after appropriate time
+    const hideTime = warningNumber === 3 ? 8000 : 5000;
+    setTimeout(() => {
+      warningOverlay.classList.add('hidden');
+    }, hideTime);
+  }
+  
+  function updateWarningCounter() {
+    const warningCounter = document.getElementById('warningCounter');
+    const warningCountDisplay = document.getElementById('warningCountDisplay');
+    
+    if (tabSwitchCount > 0) {
+      warningCounter.classList.remove('hidden');
+      warningCountDisplay.textContent = tabSwitchCount;
+      
+      // Update counter styling based on warning level
+      warningCounter.className = 'warning-counter';
+      if (tabSwitchCount === 1) {
+        warningCounter.classList.add('warning-1');
+      } else if (tabSwitchCount === 2) {
+        warningCounter.classList.add('warning-2');
+      } else if (tabSwitchCount >= 3) {
+        warningCounter.classList.add('warning-3');
+      }
+    } else {
+      warningCounter.classList.add('hidden');
+    }
+  }
+  
+  function blockTest() {
+    isTestBlocked = true;
+    
+    // Update theme to blocked state
+    updateThemeForState();
+    
+    // Hide other overlays
+    document.getElementById('focusWarning').classList.add('hidden');
+    
+    // Show blocked overlay
+    const t = translations[currentLanguage];
+    const blockedOverlay = document.getElementById('testBlockedOverlay');
+    
+    // Update blocked overlay content
+    document.querySelector('.blocked-heading').textContent = t.blocked.title;
+    document.querySelector('.blocked-message').textContent = t.blocked.message;
+    document.querySelector('.consequence-box h4').textContent = t.blocked.consequences;
+    document.querySelectorAll('.consequence-box li')[0].textContent = t.blocked.consequence1;
+    document.querySelectorAll('.consequence-box li')[1].textContent = t.blocked.consequence2;
+    document.querySelectorAll('.consequence-box li')[2].textContent = t.blocked.consequence3;
+    document.querySelectorAll('.consequence-box li')[3].textContent = t.blocked.consequence4;
+    document.querySelector('.blocked-footer').innerHTML = `<i class="fas fa-shield-alt"></i> ${t.blocked.footer}`;
+    
+    blockedOverlay.classList.remove('hidden');
+    
+    // Disable all interactions
+    document.querySelectorAll('button, input, select, textarea').forEach(element => {
+      element.disabled = true;
+    });
+    
+    // Stop timer
+    clearInterval(testTimer);
+    
+    // Auto-submit test
+    setTimeout(() => {
+      submitTest();
+    }, 3000);
+  }
+  
+  // ========== TIME REMINDER SYSTEM ==========
+  function checkTimeReminders() {
+    const timeLeftMinutes = timeLeft / 60;
+    
+    if (timeLeft <= 900 && timeLeft > 895 && !timerWarningShown) {
+      // 15 minutes remaining
+      showToast(translations[currentLanguage].warnings.timeWarning15, 'warning');
+      document.getElementById('timer').classList.add('pulse');
+    }
+    
+    if (timeLeft <= 300 && timeLeft > 295) {
+      // 5 minutes remaining
+      showToast(translations[currentLanguage].warnings.timeWarning5, 'warning');
+      document.getElementById('timer').classList.remove('pulse');
+      document.getElementById('timer').classList.add('pulse-fast');
+    }
+    
+    if (timeLeft <= 60 && timeLeft > 55) {
+      // 1 minute remaining
+      showToast(translations[currentLanguage].warnings.timeWarning1, 'critical');
+      document.getElementById('timer').classList.remove('pulse-fast');
+      document.getElementById('timer').classList.add('pulse-critical');
+    }
+  }
+  
+  // ========== INITIALIZATION ==========
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set up theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+    
+    themeToggle.addEventListener('click', function() {
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('theme', 'dark');
+      }
+      updateThemeForState();
+    });
+    
+    // Set up language toggle
+    const savedLanguage = localStorage.getItem('testLanguage') || 'english';
+    setLanguage(savedLanguage);
+    
+    document.getElementById('languageToggle').addEventListener('click', function(e) {
+      if (!e.target.classList.contains('language-option')) return;
+      
+      const lang = e.target.getAttribute('data-lang');
+      setLanguage(lang);
+    });
+    
+    // Add scroll effect to header
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 10) {
+        document.getElementById('header').classList.add('scrolled');
+      } else {
+        document.getElementById('header').classList.remove('scrolled');
+      }
+    });
+    
+    // Initialize cheating detection
+    initCheatingDetection();
+    initCopyPasteBlocking();
+    
+    // Set up event listeners for modals
+    document.getElementById('agreeBtn').addEventListener('click', function() {
+      if (document.getElementById('agreeCheckbox').checked) {
+        document.getElementById('agreementOverlay').classList.add('hidden');
+        startTest();
+      } else {
+        showToast("You must agree to all terms and conditions to continue", 'warning');
+      }
+    });
+    
+    document.getElementById('disagreeBtn').addEventListener('click', function() {
+      document.getElementById('agreementOverlay').classList.add('hidden');
+      document.getElementById('loginContainer').classList.remove('hidden');
+    });
+    
+    document.getElementById('restrictionOkBtn').addEventListener('click', function() {
+      document.getElementById('restrictionOverlay').classList.add('hidden');
+      document.getElementById('loginContainer').classList.remove('hidden');
+    });
+    
+    document.getElementById('screenshotBtn').addEventListener('click', captureResult);
+    document.getElementById('closeScoreBtn').addEventListener('click', function() {
+      document.getElementById('scoreModal').classList.add('hidden');
+    });
+    
+    // Submit button
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      submitTest();
+    });
+    
+    // Add input focus animations
+    document.querySelectorAll('#loginBox input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  });
+  
+  // ========== EXISTING FUNCTIONS (PRESERVED) ==========
+  function fetchTimerConfig() {
+    return fetch(`${SCRIPT_URL}?action=getTimerConfig`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.timerMinutes) {
+          return parseInt(data.timerMinutes);
+        } else {
+          return 30; // fallback in case config not found
+        }
+      })
+      .catch(() => 30); // fallback on network error
+  }
+  
+  function login() {
+    studentId = document.getElementById('studentId').value.trim();
+    password = document.getElementById('password').value.trim();
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('loginBtn').disabled = true;
+    document.getElementById('loginLoading').style.display = "flex";
+    
+    // Animate login button
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+    
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ action: "login", id: studentId, password: password })
+    })
+    .then(res => res.json())
+    .then(res => {
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginLoading').style.display = "none";
+      loginBtn.textContent = translations[currentLanguage].login.loginBtn;
+      
+      if (res.success) {
+        // Smooth transition to test
+        document.getElementById('loginContainer').style.opacity = '0';
+        document.getElementById('loginContainer').style.transform = 'translateY(-20px)';
+        
+        setTimeout(() => {
+          document.getElementById('loginContainer').classList.add('hidden');
+          document.getElementById('loginContainer').style.opacity = '';
+          document.getElementById('loginContainer').style.transform = '';
+          
+          document.getElementById('studentName').textContent = formatName(res.name);
+          document.getElementById('studentIdDisplay').textContent = studentId;
+          
+          // Set avatar initials
+          const nameParts = res.name.split(' ');
+          const initials = nameParts.length >= 2 
+            ? (nameParts[0].charAt(0) + nameParts[nameParts.length-1].charAt(0)).toUpperCase()
+            : nameParts[0].substring(0, 2).toUpperCase();
+          document.getElementById('avatar').textContent = initials;
+          
+          if (res.restriction?.toUpperCase() === 'YES') {
+            document.getElementById('restrictionMessage').textContent = 
+              translations[currentLanguage].restriction.message;
+            showRestriction(res.restrictionMessage || translations[currentLanguage].restriction.message);
+          } else {
+            // Show agreement popup before starting test
+            showAgreementPopup();
+          }
+        }, 500);
+      } else {
+        showError(res.message || "Login failed");
+      }
+    })
+    .catch(() => {
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginLoading').style.display = "none";
+      loginBtn.textContent = translations[currentLanguage].login.loginBtn;
+      showError("Network error. Please try again.");
+    });
+  }
+  
+  function showAgreementPopup() {
+    document.getElementById('agreementOverlay').classList.remove('hidden');
+  }
+  
+  function startTest() {
+    // Show student info, submit button, and environment reminder
+    document.getElementById('studentInfo').classList.remove('hidden');
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('environmentReminder').classList.add('visible');
+    
+    // Record start time
+    startTime = new Date();
+    
+    // Update theme to focus mode
+    updateThemeForState();
+    
+    fetchTimerConfig().then(minutes => {
+      testDuration = 60 * 60; // 60 minutes
+      timeLeft = testDuration;
+      updateTimerDisplay();
+      startTimer();
+      fetchQuestions();
+    });
+  }
+  
+  function startTimer() {
+    clearInterval(testTimer);
+    testTimer = setInterval(() => {
+      if (isTestBlocked) {
+        clearInterval(testTimer);
+        return;
+      }
+      
+      timeLeft--;
+      updateTimerDisplay();
+      updateThemeForState();
+      checkTimeReminders();
+      
+      if (timeLeft <= 300 && !timerWarningShown) {
+        timerWarningShown = true;
+        showToast("Warning: Only 5 minutes remaining!", 'warning');
+      }
+      
+      if (timeLeft <= 60 && !timerFinalWarningShown) {
+        timerFinalWarningShown = true;
+        showToast("Final Warning: Only 1 minute remaining!", 'critical');
+      }
+      
+      if (timeLeft <= 0) {
+        clearInterval(testTimer);
+        document.getElementById('timer').classList.add('danger');
+        document.getElementById('mobileTimer').classList.add('danger');
+        document.getElementById('timerDisplay').textContent = "TIME'S UP!";
+        document.getElementById('mobileTimerDisplay').textContent = "END!";
+        showToast("Time's up! Your test is being submitted automatically.", 'critical');
+        setTimeout(() => {
+          submitTest();
+        }, 2000);
+      }
+    }, 1000);
+  }
+  
+  function updateTimerDisplay() {
+    const hours = Math.floor(timeLeft / 3600);
+    const minutes = Math.floor((timeLeft % 3600) / 60);
+    const seconds = timeLeft % 60;
+    
+    document.getElementById('timerDisplay').textContent = 
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update mobile timer
+    document.getElementById('mobileTimerDisplay').textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update progress bar
+    const progressPercent = (timeLeft / testDuration) * 100;
+    document.getElementById('progressFill').style.width = `${progressPercent}%`;
+    
+    // Show/hide mobile timer
+    if (window.innerWidth <= 900) {
+      document.getElementById('mobileTimer').classList.remove('hidden');
+    }
+  }
+  
+  function showError(msg) {
+    const e = document.getElementById('loginError');
+    e.style.display = 'block';
+    e.textContent = msg;
+    e.classList.add('show');
+    
+    // Shake animation
+    e.style.animation = 'none';
+    setTimeout(() => {
+      e.style.animation = 'shake 0.5s ease';
+    }, 10);
+    
+    setTimeout(() => {
+      e.classList.remove('show');
+    }, 5000);
+  }
+  
+  function showRestriction(msg) {
+    document.getElementById('restrictionMessage').textContent = msg;
+    document.getElementById('restrictionOverlay').classList.remove('hidden');
+  }
+  
+  function fetchQuestions() {
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ action: "fetchQuestions", id: studentId, password: password })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && Array.isArray(res.questions)) {
+        currentQuestions = res.questions;
+        validRenderedQuestions = [];
+
+        let out = '';
+        res.questions.forEach((q, i) => {
+          if (q.question && q.options && q.options.length > 0) {
+            validRenderedQuestions.push(i);
+            
+            const isLongQuestion = q.question.length > 120;
+            const isDragDrop = q.type && q.type.toLowerCase() === 'dragdrop';
+            
+            out += `
+              <div class="question-card ${isLongQuestion ? 'long' : ''}" id="questionCard${i}">
+                <div class="question-number">${validRenderedQuestions.length}. Question</div>
+                <div class="question-text">${q.question}</div>
+                ${q.audio ? renderAudioPlayer(q, i) : ''}
+                <div class="options-container">
+                  ${isDragDrop ? renderDragDropQuestion(q, i) : renderRadioOptions(q, i)}
+                </div>
+              </div>`;
+          }
+        });
+
+        document.getElementById('questionsArea').innerHTML = out || '<div class="text-center mt-2">No valid questions found.</div>';
+        
+        // Initialize progress sidebar
+        initProgressSidebar();
+        
+        // Add no-copy-paste class to all question inputs
+        document.querySelectorAll('.question-card input, .question-card textarea, .drag-option, .option').forEach(element => {
+          element.classList.add('no-copy-paste');
+        });
+        
+        // Add option selection feedback
+        document.querySelectorAll('.option input[type="radio"]').forEach(radio => {
+          radio.addEventListener('change', function() {
+            const option = this.closest('.option');
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Update progress dot
+            const questionIndex = this.name.replace('q', '');
+            updateProgressDot(questionIndex, 'answered');
+          });
+        });
+        
+        if (document.querySelector('.drag-drop-target')) {
+          initDragDrop();
+        }
+      }
+    })
+    .catch(() => {
+      document.getElementById('questionsArea').innerHTML = '<div class="text-center mt-2" style="color:var(--wrong-color);">Error loading questions. Please try again.</div>';
+    });
+  }
+  
+  function initProgressSidebar() {
+    const sidebar = document.getElementById('progressSidebar');
+    sidebar.classList.remove('hidden');
+    
+    let dotsHTML = '';
+    validRenderedQuestions.forEach((qIndex, i) => {
+      dotsHTML += `<div class="progress-dot" id="progressDot${qIndex}" data-index="${qIndex}" data-tooltip="Question ${i+1}"></div>`;
+    });
+    
+    sidebar.innerHTML = dotsHTML;
+    
+    // Add click events to scroll to questions
+    document.querySelectorAll('.progress-dot').forEach(dot => {
+      dot.addEventListener('click', function() {
+        const index = this.getAttribute('data-index');
+        const questionCard = document.getElementById(`questionCard${index}`);
+        if (questionCard) {
+          questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          questionCard.style.animation = 'none';
+          setTimeout(() => {
+            questionCard.style.animation = 'pulse 1s';
+          }, 10);
+        }
+      });
+    });
+  }
+  
+  function updateProgressDot(index, status) {
+    const dot = document.getElementById(`progressDot${index}`);
+    if (dot) {
+      dot.classList.remove('answered', 'current', 'correct', 'incorrect');
+      dot.classList.add(status);
+    }
+  }
+  
+  function renderAudioPlayer(q, i) {
+    return `
+      <div class="audio-container">
+        <button type="button" class="audio-btn" id="audioBtn${i}" onclick="playAudio('${q.audio}', ${i});return false;">
+          <i class="fa-solid fa-play" id="audioIcon${i}"></i>
+        </button>
+        <div class="waveform" id="waveform${i}">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+        <div class="audio-progress">
+          <div class="audio-progress-bar" id="audioProgress${i}"></div>
+        </div>
+        <div class="audio-time" id="audioTime${i}">0:00</div>
+      </div>`;
+  }
+  
+  function renderRadioOptions(q, i) {
+    return q.options.map((opt, idx) => `
+      <div class="option">
+        <input type="radio" name="q${i}" value="${String.fromCharCode(65+idx)}" id="q${i}opt${idx}">
+        <span class="option-label">${String.fromCharCode(65+idx)}.</span>
+        <label for="q${i}opt${idx}">${opt}</label>
+      </div>
+    `).join('');
+  }
+  
+  function renderDragDropQuestion(q, i) {
+    return `
+      <div class="drag-drop-container">
+        <div class="drag-drop-options" id="dragOptions${i}">
+          ${q.options.map((opt, idx) => `
+            <div class="drag-option" draggable="true" data-value="${String.fromCharCode(65+idx)}">
+              <span class="option-label">${String.fromCharCode(65+idx)}.</span> ${opt}
+            </div>
+          `).join('')}
+        </div>
+        <div class="drag-drop-target" id="dragTarget${i}" data-question="${i}">
+          Drop your answer here
+        </div>
+        <input type="hidden" name="q${i}" id="dragAnswer${i}" value="">
+      </div>
+    `;
+  }
+  
+  function initDragDrop() {
+    const targets = document.querySelectorAll('.drag-drop-target');
+    
+    targets.forEach(target => {
+      target.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        target.classList.add('active');
+      });
+      
+      target.addEventListener('dragleave', () => {
+        target.classList.remove('active');
+      });
+      
+      target.addEventListener('drop', (e) => {
+        e.preventDefault();
+        target.classList.remove('active');
+        
+        const data = e.dataTransfer.getData('text/plain');
+        const questionIndex = target.getAttribute('data-question');
+        const answerInput = document.getElementById(`dragAnswer${questionIndex}`);
+        
+        if (data && answerInput) {
+          target.classList.add('has-item');
+          target.innerHTML = '';
+          
+          const answerElement = document.createElement('div');
+          answerElement.className = 'dropped-item';
+          answerElement.innerHTML = document.querySelector(`.drag-option[data-value="${data}"]`).innerHTML;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-btn';
+          removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+          removeBtn.onclick = () => {
+            target.innerHTML = 'Drop your answer here';
+            target.classList.remove('has-item');
+            answerInput.value = '';
+          };
+          
+          answerElement.appendChild(removeBtn);
+          target.appendChild(answerElement);
+          answerInput.value = data;
+          
+          // Update progress dot
+          updateProgressDot(questionIndex, 'answered');
+        }
+      });
+    });
+    
+    const options = document.querySelectorAll('.drag-option');
+    options.forEach(option => {
+      option.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', option.getAttribute('data-value'));
+        option.style.opacity = '0.5';
+      });
+      
+      option.addEventListener('dragend', () => {
+        option.style.opacity = '';
+      });
+    });
+  }
+  
+  function submitTest() {
+    if (isTestBlocked) return;
+    
+    clearInterval(testTimer);
+    
+    // Update theme to achievement mode
+    document.documentElement.setAttribute('data-state', 'achievement');
+    
+    // Record end time
+    endTime = new Date();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+    // Show loading state
+    const messages = [
+      `⏳ Wait! We're checking your answers...`,
+      `🤔 Analyzing your responses carefully...`,
+      `📊 Almost done! Calculating your score now...`,
+      `🔍 Reviewing each question thoroughly...`,
+      `📝 Finalizing your test results...`
+    ];
+    let index = 0;
+    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${messages[index]}`;
+    submissionInterval = setInterval(() => {
+      index = (index + 1) % messages.length;
+      submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${messages[index]}`;
+    }, 2000);
+
+    setTimeout(() => {
+      clearInterval(submissionInterval);
+
+      const answers = validRenderedQuestions.map(qIndex => {
+        const dragAnswer = document.getElementById(`dragAnswer${qIndex}`);
+        if (dragAnswer && dragAnswer.value) return dragAnswer.value;
+        
+        const radios = document.getElementsByName(`q${qIndex}`);
+        for (let r of radios) if (r.checked) return r.value;
+        return '';
+      });
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: "submitTest",
+          id: studentId,
+          password: password,
+          answers: JSON.stringify(answers)
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.results)) {
+          // Calculate statistics
+          const totalQuestions = validRenderedQuestions.length;
+          const correctAnswers = res.results.filter(r => r && r.isCorrect).length;
+          const wrongAnswers = totalQuestions - correctAnswers;
+          const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+          const totalScore = res.score || 0;
+          const totalPoints = res.totalPoints || 0;
+          
+          // Calculate time spent
+          const timeSpentMs = endTime - startTime;
+          const timeSpentMinutes = Math.floor(timeSpentMs / 60000);
+          const timeSpentSeconds = Math.floor((timeSpentMs % 60000) / 1000);
+          
+          // Calculate sub-scores (simulated based on overall performance)
+          const fluencyScore = Math.min(10, Math.round((correctAnswers / totalQuestions) * 10));
+          const vocabularyScore = Math.min(10, Math.round((correctAnswers / totalQuestions) * 9));
+          const grammarScore = Math.min(10, Math.round((correctAnswers / totalQuestions) * 8));
+          
+          // Set score modal content
+          document.getElementById('scoreAvatar').textContent = document.getElementById('avatar').textContent;
+          document.getElementById('scoreUserName').textContent = document.getElementById('studentName').textContent;
+          document.getElementById('scoreUserId').textContent = document.getElementById('studentIdDisplay').textContent;
+          
+          // Update summary cards
+          document.getElementById('finalScore').textContent = totalScore;
+          document.getElementById('correctAnswers').textContent = correctAnswers;
+          document.getElementById('wrongAnswers').textContent = wrongAnswers;
+          document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+          
+          // Update performance metrics
+          document.getElementById('fluencyScore').textContent = `${fluencyScore}/10`;
+          document.getElementById('vocabularyScore').textContent = `${vocabularyScore}/10`;
+          document.getElementById('grammarScore').textContent = `${grammarScore}/10`;
+          
+          // Animate progress bars
+          setTimeout(() => {
+            document.getElementById('fluencyBar').style.width = `${fluencyScore * 10}%`;
+            document.getElementById('vocabularyBar').style.width = `${vocabularyScore * 10}%`;
+            document.getElementById('grammarBar').style.width = `${grammarScore * 10}%`;
+          }, 500);
+          
+          // Generate breakdown list
+          let breakdownHTML = '';
+          validRenderedQuestions.forEach((qIndex, i) => {
+            const result = res.results[i];
+            if (result) {
+              breakdownHTML += `
+                <div class="breakdown-item ${result.isCorrect ? 'correct' : 'wrong'}">
+                  <div class="breakdown-status ${result.isCorrect ? 'correct' : 'wrong'}">
+                    <i class="fas fa-${result.isCorrect ? 'check' : 'times'}"></i>
+                  </div>
+                  <div class="breakdown-question">
+                    <div class="breakdown-q-number">Question ${i+1}</div>
+                    <div class="breakdown-q-result">${result.isCorrect ? 'Correct' : 'Wrong'}</div>
+                  </div>
+                </div>
+              `;
+            }
+          });
+          document.getElementById('breakdownList').innerHTML = breakdownHTML;
+          
+          // Show result badges on questions
+          validRenderedQuestions.forEach((qIndex, i) => {
+            const result = res.results[i];
+            const questionCard = document.getElementById(`questionCard${qIndex}`);
+            
+            if (questionCard && result) {
+              const badge = document.createElement('div');
+              badge.className = `result-badge ${result.isCorrect ? 'result-correct' : 'result-wrong'}`;
+              badge.innerHTML = result.isCorrect 
+                ? `<i class="fa-solid fa-check"></i> Correct`
+                : `<i class="fa-solid fa-xmark"></i> Incorrect`;
+              
+              questionCard.appendChild(badge);
+              
+              // Update progress dots
+              updateProgressDot(qIndex, result.isCorrect ? 'correct' : 'incorrect');
+            }
+          });
+
+          // Show score modal
+          document.getElementById('scoreModal').classList.remove('hidden');
+        } else {
+          showToast(res.message || "Submission failed.", 'warning');
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Test";
+        }
+      })
+      .catch(() => {
+        showToast("Error submitting answers. Please try again.", 'critical');
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Test";
+      });
+    }, 6000);
+  }
+  
+  let currentAudio = null;
+  let currentAudioIndex = null;
+
+  function playAudio(url, index) {
+    const btn = document.getElementById(`audioBtn${index}`);
+    const icon = document.getElementById(`audioIcon${index}`);
+    const waveform = document.getElementById(`waveform${index}`);
+    
+    btn.classList.add('loading');
+    icon.className = 'fa-solid fa-spinner fa-spin';
+    
+    // Show loading state for 500ms minimum
+    setTimeout(() => {
+      url = fixDropboxAudioUrl(url);
+
+      if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        if (typeof currentAudioIndex === "number") {
+          const prevBtn = document.getElementById(`audioBtn${currentAudioIndex}`);
+          const prevIcon = document.getElementById(`audioIcon${currentAudioIndex}`);
+          const prevWaveform = document.getElementById(`waveform${currentAudioIndex}`);
+          prevBtn?.classList.remove('playing', 'loading');
+          prevIcon.className = 'fa-solid fa-play';
+          prevWaveform?.classList.remove('playing');
+          
+          const prevBar = document.getElementById(`audioProgress${currentAudioIndex}`);
+          prevBar && (prevBar.style.width = '0%');
+          const prevTime = document.getElementById(`audioTime${currentAudioIndex}`);
+          prevTime && (prevTime.textContent = '0:00');
+        }
+      }
+
+      currentAudio = new Audio(url);
+      currentAudioIndex = index;
+      
+      btn.classList.remove('loading');
+      btn.classList.add('playing');
+      icon.className = 'fa-solid fa-pause';
+      waveform.classList.add('playing');
+
+      const progressBar = document.getElementById(`audioProgress${index}`);
+      const timeDisplay = document.getElementById(`audioTime${index}`);
+
+      currentAudio.addEventListener('timeupdate', function () {
+        if (progressBar && currentAudio.duration) {
+          progressBar.style.width = ((currentAudio.currentTime / currentAudio.duration) * 100) + '%';
+        }
+        if (timeDisplay) {
+          const mins = Math.floor(currentAudio.currentTime / 60);
+          const secs = Math.floor(currentAudio.currentTime % 60).toString().padStart(2, '0');
+          timeDisplay.textContent = `${mins}:${secs}`;
+        }
+      });
+
+      currentAudio.addEventListener('ended', function () {
+        btn.classList.remove('playing');
+        icon.className = 'fa-solid fa-play';
+        waveform.classList.remove('playing');
+        if (progressBar) progressBar.style.width = '0%';
+        if (timeDisplay) timeDisplay.textContent = '0:00';
+      });
+
+      currentAudio.addEventListener('error', function() {
+        btn.classList.remove('playing', 'loading');
+        icon.className = 'fa-solid fa-play';
+        waveform.classList.remove('playing');
+        showToast("Error playing audio. Please try again.", 'warning');
+      });
+
+      currentAudio.play().catch(() => {
+        btn.classList.remove('playing', 'loading');
+        icon.className = 'fa-solid fa-play';
+        waveform.classList.remove('playing');
+        showToast("Could not play audio. Please check your connection.", 'warning');
+      });
+    }, 500);
+  }
+  
+  function captureResult() {
+    const resultElement = document.getElementById('scoreModal');
+    if (!resultElement) return;
+
+    // Use html2canvas library to capture the result
+    if (typeof html2canvas !== 'undefined') {
+      html2canvas(resultElement, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim()
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `IELTS-Result-${studentId}-${new Date().toISOString().slice(0,10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast("Result saved successfully!", 'success');
+      });
+    } else {
+      // Fallback if html2canvas is not loaded
+      showToast("Screenshot feature requires html2canvas library. Please contact support.", 'warning');
+    }
+  }
+  
+  // Load html2canvas library dynamically if not already loaded
+  if (typeof html2canvas === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+    script.onload = function() {
+      console.log('html2canvas loaded successfully');
+    };
+    script.onerror = function() {
+      console.log('Failed to load html2canvas');
+    };
+    document.head.appendChild(script);
+  }
+  </script>
+</body>
+</html>
