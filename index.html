@@ -2565,12 +2565,12 @@
       `;
     }
     
-    // Update results dashboard
-    document.getElementById('correctAnswersLabel').textContent = t.results.correctAnswers;
-    document.getElementById('wrongAnswersLabel').textContent = t.results.wrongAnswers;
-    document.getElementById('totalScoreLabel').textContent = t.results.totalScore;
-    document.getElementById('accuracyRateLabel').textContent = t.results.accuracyRate;
-    document.getElementById('questionBreakdownLabel').textContent = t.results.questionBreakdown;
+    // Update results dashboard labels
+    document.querySelector('.summary-card.correct .summary-label').textContent = t.results.correctAnswers;
+    document.querySelector('.summary-card.wrong .summary-label').textContent = t.results.wrongAnswers;
+    document.querySelector('.summary-card.total .summary-label').textContent = t.results.totalScore;
+    document.querySelector('.summary-card:nth-child(4) .summary-label').textContent = t.results.accuracyRate;
+    document.querySelector('.breakdown-title').innerHTML = `<i class="fas fa-list-check"></i> ${t.results.questionBreakdown}`;
     document.getElementById('screenshotBtn').innerHTML = `<i class="fas fa-camera"></i> ${t.results.saveResult}`;
     document.getElementById('closeScoreBtn').innerHTML = `<i class="fas fa-times"></i> ${t.results.close}`;
     
@@ -3121,6 +3121,9 @@
     document.getElementById('studentInfo').classList.remove('hidden');
     document.getElementById('submitBtn').classList.remove('hidden');
     document.getElementById('environmentReminder').classList.add('visible');
+    
+    // Show the main content area (test dashboard)
+    document.querySelector('.main-content').style.display = 'block';
     
     // Record start time
     startTime = new Date();
